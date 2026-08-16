@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: rooted-backend
+    runtime: node
+    rootDir: rooted/backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USER
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false
+      - key: PORT
+        value: 4000
