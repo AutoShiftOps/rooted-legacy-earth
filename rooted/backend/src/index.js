@@ -11,6 +11,7 @@ import globeRoutes from "./routes/globe.js";
 import matchesRoutes from "./routes/matches.js";
 import gedcomExportRoutes from "./routes/gedcomExport.js";
 import memorialRoutes from "./routes/memorial.js";
+import demoRoutes from "./routes/demo.js";
 import { closeDriver } from "./db/neo4j.js";
 import { startMatchQueue } from "./jobs/matchQueue.js";
 
@@ -36,6 +37,7 @@ app.use("/api/persons", consentRoutes);
 app.use("/api/globe", globeRoutes);
 app.use("/api/matches", matchesRoutes);
 app.use("/api/memorial", memorialRoutes);
+app.use("/api/demo", demoRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

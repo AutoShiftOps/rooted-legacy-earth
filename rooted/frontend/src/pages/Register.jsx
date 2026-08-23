@@ -16,7 +16,13 @@ export default function Register() {
       localStorage.setItem("rooted_person_id", res.data.personId);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed");
+      if (err.response) {
+        setError(err.response.data?.error || `Server error (${err.response.status})`);
+      } else if (err.request) {
+        setError("Could not reach the server. Check your connection or try again shortly.");
+      } else {
+        setError(err.message || "Registration failed");
+      }
     }
   };
 

@@ -21,6 +21,9 @@ export default function LandingGlobe() {
           <button onClick={() => navigate("/register")}>Start your tree</button>
           <button className="secondary" onClick={() => navigate("/login")}>Sign in</button>
         </div>
+        <button className="try-demo-link" onClick={() => navigate("/demo")}>
+          Try it without an account →
+        </button>
       </div>
     </div>
   );

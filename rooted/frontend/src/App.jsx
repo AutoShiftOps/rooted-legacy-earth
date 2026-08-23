@@ -3,6 +3,7 @@ import LandingGlobe from "./pages/LandingGlobe.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import GuestDashboard from "./pages/GuestDashboard.jsx";
 import PersonProfile from "./pages/PersonProfile.jsx";
 import ConsentSettings from "./pages/ConsentSettings.jsx";
 import Matches from "./pages/Matches.jsx";
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/demo" element={<GuestDashboard />} />
       <Route path="/person/:id" element={<PersonProfile />} />
       <Route path="/settings/consent" element={<ConsentSettings />} />
       <Route path="/matches" element={<Matches />} />
