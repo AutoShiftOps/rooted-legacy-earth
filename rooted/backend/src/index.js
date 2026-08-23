@@ -9,6 +9,8 @@ import treeRoutes from "./routes/tree.js";
 import consentRoutes from "./routes/consent.js";
 import globeRoutes from "./routes/globe.js";
 import matchesRoutes from "./routes/matches.js";
+import gedcomExportRoutes from "./routes/gedcomExport.js";
+import memorialRoutes from "./routes/memorial.js";
 import { closeDriver } from "./db/neo4j.js";
 import { startMatchQueue } from "./jobs/matchQueue.js";
 
@@ -29,9 +31,11 @@ app.get("/health", (_req, res) => res.json({ status: "ok", service: "rooted-back
 app.use("/api/auth", authRoutes);
 app.use("/api/persons", personRoutes);
 app.use("/api/tree", treeRoutes);
+app.use("/api/tree", gedcomExportRoutes);
 app.use("/api/persons", consentRoutes);
 app.use("/api/globe", globeRoutes);
 app.use("/api/matches", matchesRoutes);
+app.use("/api/memorial", memorialRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
