@@ -20,11 +20,11 @@ whenever scope changes so nothing gets lost between sessions.
 - Docker Compose local dev, Vercel/Render deploy configs, GitHub Actions CI
 
 ## Phase 2 — Cinematic Polish
-🟢 **Core wiring complete** (updated 2026-08-23).
+🟢 **Core wiring complete.**
 - Multi-stage fly-to camera choreography fires on pin click (`useFlyToChoreography`,
-  now living in `frontend/src/hooks/` after a Vercel build fix — see below)
+  in `frontend/src/hooks/`)
 - Timeline scrubber filters globe pins/arcs live by year (`TimelineScrubber`,
-  now in `frontend/src/components/`)
+  in `frontend/src/components/`)
 
 ### Still Pending
 - ⚪ Ambient audio layer (Howler.js-based, volume tied to zoom level)
@@ -33,8 +33,8 @@ whenever scope changes so nothing gets lost between sessions.
   currently only a static glow-ring color/size treatment, not particles
 
 ## Phase 3 — Reconnection Engine
-🟢 **End-to-end loop complete** (updated 2026-08-23). This is the app's core
-motto and now actually functions, not just exists as pure functions.
+🟢 **End-to-end loop complete.** This is the app's core motto and now
+actually functions, not just exists as pure functions.
 - `POST /api/matches/scan` — on-demand candidate scan for the calling user
 - `matchQueue.js` — nightly cron job scaffold (2:00 AM), wired into server startup
 - `Match` Neo4j node type + `CANDIDATE_OF` edges linking candidate Person pairs
@@ -54,7 +54,7 @@ motto and now actually functions, not just exists as pure functions.
 - ⚪ Pagination/ranking on `GET /api/matches` if match volume grows.
 
 ## Phase 4 — Community & Virality
-🟢 **Core features complete** (updated 2026-08-23).
+🟢 **Core features complete.**
 - `gedcomExporter.js` — serializes a tree to GEDCOM 5.5.1, wired to
   `GET /api/tree/:rootPersonId/export/gedcom`, with a working export button
   on the person profile page
@@ -76,16 +76,28 @@ motto and now actually functions, not just exists as pure functions.
 
 ## Build Fix Log
 
-**2026-08-23 — Vercel build failure resolved.** The initial Phase 2 wiring
-commit imported `useFlyToChoreography.js` and `TimelineScrubber.jsx` from the
-top-level `rooted/phase2-cinematic/` folder — outside `rooted/frontend/`,
-which is Vercel's configured Root Directory. Since Vercel builds that
-directory in isolation, the cross-directory import broke module resolution
-and failed every deploy. Fixed by relocating both files into
-`frontend/src/hooks/` and `frontend/src/components/` respectively, and by
-adding `vercel.json` directly inside `rooted/frontend/` (it previously only
-existed at `rooted/infra/vercel.json`, unreachable once Root Directory
-scoping applies).
+**2026-08-23 — Vercel build failure #1: cross-directory import.** The initial
+Phase 2 wiring commit imported `useFlyToChoreography.js` and
+`TimelineScrubber.jsx` from the top-level `rooted/phase2-cinematic/` folder —
+outside `rooted/frontend/`, which is Vercel's configured Root Directory.
+Since Vercel builds that directory in isolation, the cross-directory import
+broke module resolution and failed every deploy. Fixed by relocating both
+files into `frontend/src/hooks/` and `frontend/src/components/`
+respectively, and by adding `vercel.json` directly inside `rooted/frontend/`
+(it previously only existed at `rooted/infra/vercel.json`, unreachable once
+Root Directory scoping applies).
+
+**2026-08-23 — Vercel build failure #2: top-level await unsupported by
+build target.** After fix #1, a new build error surfaced:
+`Top-level await is not available in the configured target environment
+("chrome87", "edge88", "es2020", "firefox78", "safari14" + 2 overrides)`.
+Root cause: `react-globe.gl`'s dependency `three.js` ships a WebGPU
+capability-detection snippet using top-level `await navigator.gpu.requestAdapter()`.
+Vite's default esbuild target for production builds doesn't support
+top-level await (that requires ES2022+). Fixed by setting both
+`build.target` and `optimizeDeps.esbuildOptions.target` to `"esnext"` in
+`frontend/vite.config.js` — safe since all modern evergreen browsers
+support top-level await natively.
 
 **Note:** `rooted/backend/src/routes/matches.js` and `gedcomExport.js` still
 import from `rooted/phase3-reconnection-engine/` and
@@ -110,7 +122,7 @@ deployment issues appear.
 
 ---
 
-## Phase 5 — Emotional Depth & Retention (added 2026-08-23)
+## Phase 5 — Emotional Depth & Retention
 
 - ⚪ **Voice/video memory capsules** — attach a short voice note or video to a
   deceased person's profile. Requires media upload (see Foundational Gaps)
