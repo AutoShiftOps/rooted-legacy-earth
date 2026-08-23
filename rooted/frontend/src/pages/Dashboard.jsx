@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import CinematicGlobe from "../components/CinematicGlobe.jsx";
 import FamilyTreePanel from "../components/FamilyTreePanel.jsx";
-import TimelineScrubber from "../../phase2-cinematic/TimelineScrubber.jsx";
+import TimelineScrubber from "../components/TimelineScrubber.jsx";
 import { api } from "../api/client.js";
 
 export default function Dashboard() {

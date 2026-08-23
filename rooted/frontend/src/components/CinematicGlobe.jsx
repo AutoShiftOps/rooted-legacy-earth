@@ -1,11 +1,16 @@
 import { useRef, useEffect, useState } from "react";
 import Globe from "react-globe.gl";
-import { useFlyToChoreography } from "../../phase2-cinematic/useFlyToChoreography.js";
+import { useFlyToChoreography } from "../hooks/useFlyToChoreography.js";
 
 /**
- * CinematicGlobe v2 — now wired with multi-stage fly-to choreography on pin
+ * CinematicGlobe v2 — wired with multi-stage fly-to choreography on pin
  * click (Phase 2). Deceased pins render with a soft outer glow ring to hint
  * at the "remembrance" visual treatment (full particle system is a follow-up).
+ *
+ * Note: useFlyToChoreography and TimelineScrubber now live inside
+ * frontend/src/ rather than the top-level phase2-cinematic/ folder, since
+ * Vercel builds this directory in isolation (Root Directory = rooted/frontend)
+ * and cannot resolve imports that reach outside it.
  */
 export default function CinematicGlobe({ pins = [], arcs = [], onPinClick, autoRotate = true, yearFilter = null }) {
   const globeRef = useRef();
