@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import PersonProfile from "./pages/PersonProfile.jsx";
 import ConsentSettings from "./pages/ConsentSettings.jsx";
 import Matches from "./pages/Matches.jsx";
+import AddPerson from "./pages/AddPerson.jsx";
+import MemorialWall from "./pages/MemorialWall.jsx";
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
       <Route path="/person/:id" element={<PersonProfile />} />
       <Route path="/settings/consent" element={<ConsentSettings />} />
       <Route path="/matches" element={<Matches />} />
+      <Route path="/add-person" element={<AddPerson />} />
+      <Route path="/memorial/:id" element={<MemorialWall />} />
     </Routes>
   );
 }

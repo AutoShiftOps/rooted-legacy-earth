@@ -40,6 +40,8 @@ export default function Dashboard() {
       />
       <div className="dashboard-toolbar">
         <button onClick={openTree}>View my family tree</button>
+        <a href="/add-person">Add family member</a>
+        <a href="/matches">Possible connections</a>
         <a href="/settings/consent">Consent settings</a>
       </div>
       <TimelineScrubber
