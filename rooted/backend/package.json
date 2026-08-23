@@ -1,7 +1,7 @@
 {
   "name": "rooted-backend",
-  "version": "1.0.0",
-  "description": "Rooted API - Neo4j-backed family graph and consent engine",
+  "version": "1.1.0",
+  "description": "Rooted API - Neo4j-backed family graph, consent engine, and reconnection matching",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -18,7 +18,8 @@
     "jsonwebtoken": "^9.0.2",
     "uuid": "^9.0.1",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.4.0"
+    "express-rate-limit": "^7.4.0",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.4",

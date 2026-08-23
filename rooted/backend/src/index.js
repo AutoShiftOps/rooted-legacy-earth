@@ -8,7 +8,9 @@ import personRoutes from "./routes/persons.js";
 import treeRoutes from "./routes/tree.js";
 import consentRoutes from "./routes/consent.js";
 import globeRoutes from "./routes/globe.js";
+import matchesRoutes from "./routes/matches.js";
 import { closeDriver } from "./db/neo4j.js";
+import { startMatchQueue } from "./jobs/matchQueue.js";
 
 dotenv.config();
 
@@ -29,13 +31,17 @@ app.use("/api/persons", personRoutes);
 app.use("/api/tree", treeRoutes);
 app.use("/api/persons", consentRoutes);
 app.use("/api/globe", globeRoutes);
+app.use("/api/matches", matchesRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
 
-const server = app.listen(PORT, () => console.log(`Rooted API listening on :${PORT}`));
+const server = app.listen(PORT, () => {
+  console.log(`Rooted API listening on :${PORT}`);
+  startMatchQueue();
+});
 
 process.on("SIGTERM", async () => {
   await closeDriver();
