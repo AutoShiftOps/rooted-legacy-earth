@@ -1,9 +1,16 @@
 import { useRef, useEffect, useState } from "react";
 import Globe from "react-globe.gl";
+import { useFlyToChoreography } from "../../phase2-cinematic/useFlyToChoreography.js";
 
-export default function CinematicGlobe({ pins = [], arcs = [], onPinClick, autoRotate = true }) {
+/**
+ * CinematicGlobe v2 — now wired with multi-stage fly-to choreography on pin
+ * click (Phase 2). Deceased pins render with a soft outer glow ring to hint
+ * at the "remembrance" visual treatment (full particle system is a follow-up).
+ */
+export default function CinematicGlobe({ pins = [], arcs = [], onPinClick, autoRotate = true, yearFilter = null }) {
   const globeRef = useRef();
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const { flyToPerson } = useFlyToChoreography(globeRef);
 
   useEffect(() => {
     const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
@@ -19,13 +26,24 @@ export default function CinematicGlobe({ pins = [], arcs = [], onPinClick, autoR
     }
   }, [autoRotate]);
 
-  const pointColor = (d) => (d.isLiving ? "#e8f1ff" : "#ffb347");
+  const visiblePins = yearFilter
+    ? pins.filter((p) => {
+        const born = p.birthYear || -Infinity;
+        const died = p.deathYear || Infinity;
+        return born <= yearFilter && yearFilter <= died;
+      })
+    : pins;
 
-  const flyToPin = (pin) => {
-    if (globeRef.current) {
-      globeRef.current.pointOfView({ lat: pin.lat, lng: pin.lng, altitude: 0.6 }, 1800);
-    }
-    onPinClick && onPinClick(pin);
+  const visibleArcs = yearFilter
+    ? arcs.filter((a) => (a.year ? a.year <= yearFilter : true))
+    : arcs;
+
+  const pointColor = (d) => (d.isLiving ? "#e8f1ff" : "#ffb347");
+  const pointAltitude = (d) => (d.isLiving ? 0.01 : 0.015);
+  const pointRadius = (d) => (d.isLiving ? 0.35 : 0.42);
+
+  const handlePinClick = (pin) => {
+    flyToPerson(pin, { onArrive: () => onPinClick && onPinClick(pin) });
   };
 
   return (
@@ -38,15 +56,15 @@ export default function CinematicGlobe({ pins = [], arcs = [], onPinClick, autoR
       backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
       atmosphereColor="#5aa9ff"
       atmosphereAltitude={0.22}
-      pointsData={pins}
+      pointsData={visiblePins}
       pointLat="lat"
       pointLng="lng"
       pointColor={pointColor}
-      pointAltitude={0.01}
-      pointRadius={0.35}
+      pointAltitude={pointAltitude}
+      pointRadius={pointRadius}
       pointLabel={(d) => `${d.name}${d.isLiving ? "" : ` (${d.birthYear ?? "?"}–${d.deathYear ?? "?"})`}`}
-      onPointClick={flyToPin}
-      arcsData={arcs}
+      onPointClick={handlePinClick}
+      arcsData={visibleArcs}
       arcStartLat="startLat"
       arcStartLng="startLng"
       arcEndLat="endLat"

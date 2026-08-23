@@ -51,3 +51,72 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .profile-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 2rem; }
 .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; }
 .memorial-dates { opacity: 0.7; font-style: italic; }
+
+.add-person-form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 480px; margin: 2rem auto; }
+.add-person-form input, .add-person-form select, .add-person-form textarea {
+  padding: 0.75rem; border-radius: 8px; border: 1px solid #333; background: #10131c; color: #fff;
+}
+.attestation-block {
+  background: rgba(255, 179, 71, 0.08); border: 1px solid rgba(255, 179, 71, 0.3);
+  border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;
+}
+.attestation-title { font-size: 0.85rem; opacity: 0.85; }
+.attestation-checkbox { display: flex; gap: 0.5rem; font-size: 0.8rem; line-height: 1.4; align-items: flex-start; }
+
+/* Phase 2 — Timeline scrubber */
+.timeline-scrubber {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(8, 10, 18, 0.75);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.timeline-scrubber input[type="range"] {
+  width: 320px;
+  accent-color: #5aa9ff;
+}
+.timeline-scrubber span {
+  font-size: 0.9rem;
+  color: #f0f4ff;
+  min-width: 3.5ch;
+  text-align: right;
+}
+
+/* Phase 3 — Matches page and possible connection cards */
+.matches-page { max-width: 640px; margin: 3rem auto; padding: 2rem; }
+.matches-page button {
+  margin: 1rem 0; padding: 0.7rem 1.4rem; border-radius: 8px; background: #5aa9ff;
+  border: none; color: #05070d; font-weight: 600; cursor: pointer;
+}
+.matches-empty { opacity: 0.6; margin-top: 2rem; }
+.matches-list { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.5rem; }
+
+.match-card {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 1.5rem;
+}
+.match-card-header { margin-bottom: 0.75rem; }
+.match-confidence {
+  display: inline-block; background: rgba(90, 169, 255, 0.15); color: #5aa9ff;
+  padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+}
+.match-description { margin-bottom: 0.5rem; line-height: 1.5; }
+.match-candidate { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.match-years { opacity: 0.6; font-style: italic; }
+.match-note { font-size: 0.8rem; opacity: 0.65; margin-bottom: 1rem; }
+.match-actions { display: flex; gap: 0.75rem; }
+.match-actions button {
+  padding: 0.6rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 500;
+}
+.match-actions button:first-child { background: #5aa9ff; color: #05070d; }
+.match-actions .secondary { background: rgba(255,255,255,0.08); color: #fff; }
+.match-pending { color: #ffb347; font-size: 0.85rem; margin-top: 0.75rem; }
+.match-success { color: #6ee7a0; font-size: 0.85rem; margin-top: 0.75rem; }
