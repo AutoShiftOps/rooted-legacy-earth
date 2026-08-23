@@ -20,6 +20,11 @@ export const api = {
   addRelationship: (id, data) => client.post(`/api/persons/${id}/relationships`, data),
   getTree: (rootId) => client.get(`/api/tree/${rootId}`),
   setConsent: (id, data) => client.post(`/api/persons/${id}/consent`, data),
+  disputePerson: (id, data) => client.post(`/api/persons/${id}/dispute`, data),
+  scanMatches: () => client.post("/api/matches/scan"),
+  getMatches: () => client.get("/api/matches"),
+  confirmMatch: (matchId) => client.post(`/api/matches/${matchId}/confirm`),
+  rejectMatch: (matchId) => client.post(`/api/matches/${matchId}/reject`),
 };
 
 export default client;

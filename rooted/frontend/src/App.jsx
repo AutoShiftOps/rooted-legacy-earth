@@ -5,6 +5,7 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import PersonProfile from "./pages/PersonProfile.jsx";
 import ConsentSettings from "./pages/ConsentSettings.jsx";
+import Matches from "./pages/Matches.jsx";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/person/:id" element={<PersonProfile />} />
       <Route path="/settings/consent" element={<ConsentSettings />} />
+      <Route path="/matches" element={<Matches />} />
     </Routes>
   );
 }
