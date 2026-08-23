@@ -25,6 +25,8 @@ whenever scope changes so nothing gets lost between sessions.
   in `frontend/src/hooks/`)
 - Timeline scrubber filters globe pins/arcs live by year (`TimelineScrubber`,
   in `frontend/src/components/`)
+- Guest/demo mode (no login) added — `/demo` route serves a fixed sample
+  family tree via unauthenticated `/api/demo/*` backend routes.
 
 ### Still Pending
 - ⚪ Ambient audio layer (Howler.js-based, volume tied to zoom level)
@@ -83,31 +85,34 @@ outside `rooted/frontend/`, which is Vercel's configured Root Directory.
 Since Vercel builds that directory in isolation, the cross-directory import
 broke module resolution and failed every deploy. Fixed by relocating both
 files into `frontend/src/hooks/` and `frontend/src/components/`
-respectively, and by adding `vercel.json` directly inside `rooted/frontend/`
-(it previously only existed at `rooted/infra/vercel.json`, unreachable once
-Root Directory scoping applies).
+respectively, and by adding `vercel.json` directly inside `rooted/frontend/`.
 
 **2026-08-23 — Vercel build failure #2: top-level await unsupported by
-build target.** After fix #1, a new build error surfaced:
-`Top-level await is not available in the configured target environment
-("chrome87", "edge88", "es2020", "firefox78", "safari14" + 2 overrides)`.
-Root cause: `react-globe.gl`'s dependency `three.js` ships a WebGPU
+build target.** `react-globe.gl`'s dependency `three.js` ships a WebGPU
 capability-detection snippet using top-level `await navigator.gpu.requestAdapter()`.
 Vite's default esbuild target for production builds doesn't support
-top-level await (that requires ES2022+). Fixed by setting both
-`build.target` and `optimizeDeps.esbuildOptions.target` to `"esnext"` in
-`frontend/vite.config.js` — safe since all modern evergreen browsers
-support top-level await natively.
+top-level await (requires ES2022+). Fixed by setting both `build.target`
+and `optimizeDeps.esbuildOptions.target` to `"esnext"` in `frontend/vite.config.js`.
 
-**Note:** `rooted/backend/src/routes/matches.js` and `gedcomExport.js` still
-import from `rooted/phase3-reconnection-engine/` and
-`rooted/phase4-community/` respectively using relative paths that reach
-outside `rooted/backend/`. This has **not** caused a failure yet because
-Render (unlike Vercel) deploys the whole repo rather than isolating a
-subdirectory — but if Render's root directory setting is ever scoped the
-same way Vercel's is, this will break identically. Worth proactively fixing
-by moving those shared modules into `backend/src/services/` if Render
-deployment issues appear.
+**2026-08-23 — Render runtime crash: RESOLVED.** As predicted in this log,
+the same cross-directory import pattern that broke Vercel also broke Render:
+`rooted/backend/src/routes/matches.js` imported from
+`rooted/phase3-reconnection-engine/matchScoring.js`, and `gedcomExport.js`
+imported from `rooted/phase4-community/gedcomExporter.js` — both reaching
+outside `rooted/backend/`, which is Render's isolated Root Directory. This
+surfaced as `Error [ERR_MODULE_NOT_FOUND]: Cannot find module
+'/phase3-reconnection-engine/matchScoring.js'` in Render's runtime logs,
+crashing the backend on startup. **Fixed** by moving `matchScoring.js`,
+`mergeRequestFlow.js`, and `gedcomExporter.js` into `backend/src/services/`
+and updating `matches.js` / `gedcomExport.js` to import from the local path.
+The original `phase3-reconnection-engine/` and `phase4-community/` copies
+of these files still exist as reference/documentation but are no longer
+imported by the running backend — safe to leave as historical scaffolding.
+
+**Lesson learned:** any code intended to actually run in production must
+live inside the deployed service's own root directory (`frontend/` or
+`backend/`), never in a sibling `phaseN-*` folder, regardless of how the
+planning/documentation structure organizes work conceptually.
 
 ---
 
