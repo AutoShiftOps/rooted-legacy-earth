@@ -2,8 +2,8 @@ import express from "express";
 import { v4 as uuidv4 } from "uuid";
 import { getSession } from "../db/neo4j.js";
 import { requireAuth } from "../middleware/auth.js";
-import { scoreMatch, MATCH_THRESHOLD } from "../../../phase3-reconnection-engine/matchScoring.js";
-import { MATCH_STATUS, confirmMatch, rejectMatch } from "../../../phase3-reconnection-engine/mergeRequestFlow.js";
+import { scoreMatch, MATCH_THRESHOLD } from "../services/matchScoring.js";
+import { MATCH_STATUS, confirmMatch, rejectMatch } from "../services/mergeRequestFlow.js";
 
 const router = express.Router();
 

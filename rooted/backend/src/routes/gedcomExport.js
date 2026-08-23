@@ -1,7 +1,7 @@
 import express from "express";
 import { getSession } from "../db/neo4j.js";
 import { requireAuth } from "../middleware/auth.js";
-import { exportTreeToGedcom } from "../../../phase4-community/gedcomExporter.js";
+import { exportTreeToGedcom } from "../services/gedcomExporter.js";
 
 const router = express.Router();
 
