@@ -20,38 +20,82 @@ whenever scope changes so nothing gets lost between sessions.
 - Docker Compose local dev, Vercel/Render deploy configs, GitHub Actions CI
 
 ## Phase 2 — Cinematic Polish
-🟡 Partially built — `TimelineScrubber.jsx` and `useFlyToChoreography.js` exist
-as isolated files but are **not wired into** `CinematicGlobe.jsx` or `Dashboard.jsx` yet.
+🟢 **Core wiring complete** (updated 2026-08-23).
+- Multi-stage fly-to camera choreography fires on pin click (`useFlyToChoreography`,
+  now living in `frontend/src/hooks/` after a Vercel build fix — see below)
+- Timeline scrubber filters globe pins/arcs live by year (`TimelineScrubber`,
+  now in `frontend/src/components/`)
 
-### Pending
-- ⚪ Wire `useFlyToChoreography` into `CinematicGlobe.jsx` for multi-stage fly-to on pin click
-- ⚪ Wire `TimelineScrubber` into `Dashboard.jsx` / `LandingGlobe.jsx` to filter pins/arcs by year
+### Still Pending
 - ⚪ Ambient audio layer (Howler.js-based, volume tied to zoom level)
 - ⚪ Day/night terminator shader on the globe texture
-- ⚪ Particle "remembrance" effect for deceased pins (Three.js Points system)
+- ⚪ Particle "remembrance" effect for deceased pins (Three.js Points system) —
+  currently only a static glow-ring color/size treatment, not particles
 
 ## Phase 3 — Reconnection Engine
-🟡 Partially built — Cypher candidate query, match scoring function, and merge
-status machine exist as **pure functions with no API route, no job runner,
-and no frontend UI.** This is the app's core motto and the biggest functional gap.
+🟢 **End-to-end loop complete** (updated 2026-08-23). This is the app's core
+motto and now actually functions, not just exists as pure functions.
+- `POST /api/matches/scan` — on-demand candidate scan for the calling user
+- `matchQueue.js` — nightly cron job scaffold (2:00 AM), wired into server startup
+- `Match` Neo4j node type + `CANDIDATE_OF` edges linking candidate Person pairs
+- `GET /api/matches`, `POST /api/matches/:id/confirm`, `POST /api/matches/:id/reject` — all live
+- Frontend `/matches` page + `PossibleConnectionCard` — confirm/reject UI working
+- Dashboard nav link added ("Possible connections")
 
-### Pending
-- ⚪ `POST /api/matches/scan` — API route that runs candidateQuery + scoreMatch for a user's opted-in persons
-- ⚪ `matchQueue.js` — background job (node-cron or similar) that runs matching nightly for all opted-in trees
-- ⚪ `Match` node schema in Neo4j + `GET /api/matches` to list a user's pending candidate matches
-- ⚪ `POST /api/matches/:id/confirm` and `POST /api/matches/:id/reject` routes wired to `mergeRequestFlow.js`
-- ⚪ Frontend "Possible Connection" card component + a `/matches` page
-- ⚪ Notification trigger on mutual confirmation (see Notifications below)
+### Still Pending
+- ⚪ **matchQueue.js is a scaffold, not fully implemented** — the nightly job
+  currently loops opted-in users but doesn't yet call the actual scan logic
+  per user (the Cypher/scoring is duplicated in the on-demand route only).
+  Needs refactor: extract scan logic into a shared service function callable
+  from both the API route and the cron job.
+- ⚪ Notification trigger on mutual confirmation — no email/push exists yet
+  (see Foundational Gaps), so a "mutually_confirmed" match currently has no
+  way to actually notify either user outside of refreshing `/matches`.
+- ⚪ Pagination/ranking on `GET /api/matches` if match volume grows.
 
 ## Phase 4 — Community & Virality
-🟡 Partially built — only `gedcomImporter.js` (line parser) exists.
+🟢 **Core features complete** (updated 2026-08-23).
+- `gedcomExporter.js` — serializes a tree to GEDCOM 5.5.1, wired to
+  `GET /api/tree/:rootPersonId/export/gedcom`, with a working export button
+  on the person profile page
+- `memorialWallRoutes.js` — public, unauthenticated `/api/memorial/:personId`
+  respecting `public_globe_display` consent, with a live `/memorial/:id`
+  frontend page
 
-### Pending
-- ⚪ `gedcomExporter.js` — serialize a user's tree back to GEDCOM 5.5.1
-- ⚪ `memorialWallRoutes.js` — public read-only routes for opted-in memorial pages, respecting `public_globe_display` consent
-- ⚪ `snapshotGenerator.js` — server-side subtree image/link generator for social sharing
-- ⚪ Frontend GEDCOM upload UI + import review screen (map parsed records to confirm/edit before committing)
-- ⚪ Public memorial wall page template (frontend)
+### Still Pending
+- ⚪ GEDCOM **import** UI — `gedcomImporter.js` (line parser) still exists
+  only as a backend utility with no upload endpoint or review screen for a
+  user to confirm/edit parsed records before committing them to their tree.
+- ⚪ `snapshotGenerator.js` — server-side subtree image/link generator for
+  social sharing. Not started.
+- ⚪ Guestbook comment storage — `GET /api/memorial/:personId/guestbook`
+  currently returns an empty array as a stable contract; no write endpoint,
+  no persistence.
+
+---
+
+## Build Fix Log
+
+**2026-08-23 — Vercel build failure resolved.** The initial Phase 2 wiring
+commit imported `useFlyToChoreography.js` and `TimelineScrubber.jsx` from the
+top-level `rooted/phase2-cinematic/` folder — outside `rooted/frontend/`,
+which is Vercel's configured Root Directory. Since Vercel builds that
+directory in isolation, the cross-directory import broke module resolution
+and failed every deploy. Fixed by relocating both files into
+`frontend/src/hooks/` and `frontend/src/components/` respectively, and by
+adding `vercel.json` directly inside `rooted/frontend/` (it previously only
+existed at `rooted/infra/vercel.json`, unreachable once Root Directory
+scoping applies).
+
+**Note:** `rooted/backend/src/routes/matches.js` and `gedcomExport.js` still
+import from `rooted/phase3-reconnection-engine/` and
+`rooted/phase4-community/` respectively using relative paths that reach
+outside `rooted/backend/`. This has **not** caused a failure yet because
+Render (unlike Vercel) deploys the whole repo rather than isolating a
+subdirectory — but if Render's root directory setting is ever scoped the
+same way Vercel's is, this will break identically. Worth proactively fixing
+by moving those shared modules into `backend/src/services/` if Render
+deployment issues appear.
 
 ---
 
@@ -60,41 +104,35 @@ and no frontend UI.** This is the app's core motto and the biggest functional ga
 - ⚪ **Photo/media upload** — `photoUrl` is a field everywhere but there's no upload endpoint. Needs object storage integration (Supabase Storage recommended — matches existing stack).
 - ⚪ **Email verification** — registration works but emails aren't verified.
 - ⚪ **Password reset** — no recovery flow exists.
-- ⚪ **Notifications** — no email/push system; required for match confirmations and "on this day" resurfacing.
+- ⚪ **Notifications** — no email/push system; required for match confirmations and "on this day" resurfacing. This is now the single biggest UX gap in the Phase 3 loop — users have no way to know a match was confirmed without manually revisiting `/matches`.
 - ⚪ **Attestation abuse rate-limiting** — general API rate limiting exists, but nothing specifically throttles mass creation of deceased/minor records.
 - ⚪ **Guardian account linking flow** — `GUARDIAN_OF` relationship type exists in schema but there's no UI/API flow for a parent account to claim/link a minor's record.
 
 ---
 
-## New Scope Additions (added 2026-08-23)
-
-These extend the emotional core of the product beyond the original 4 phases.
-Tagged **Phase 5 — Emotional Depth & Retention** for planning purposes.
+## Phase 5 — Emotional Depth & Retention (added 2026-08-23)
 
 - ⚪ **Voice/video memory capsules** — attach a short voice note or video to a
-  deceased person's profile so visiting feels like hearing them, not just
-  reading about them. Requires media upload (see Foundational Gaps) plus a
-  new `MemoryCapsule` node type linked to `Person`.
+  deceased person's profile. Requires media upload (see Foundational Gaps)
+  plus a new `MemoryCapsule` node type linked to `Person`.
 - ⚪ **"On this day" resurfacing** — gentle notification on a birthday or
-  anniversary of passing that resurfaces that person's pin/memories.
-  Grief-sensitive by design (opt-in, not algorithmic-engagement-driven).
-  Requires the Notifications system above.
+  anniversary of passing. Requires the Notifications system above.
 - ⚪ **Collaborative tree editing with version history** — lightweight
-  "who changed what, when" log beyond attestation, so multiple relatives
-  editing a shared ancestor don't silently overwrite each other.
+  "who changed what, when" log beyond attestation.
 - ⚪ **Multi-language support (i18n)** — UI translation layer, prioritizing
-  French given the user's own language goals and likely diaspora user base
-  where family history crosses language lines.
+  French.
 - ⚪ **Offline/PDF export of a tree branch** — printable family tree poster
-  or PDF for a reunion or memorial service. Distinct from GEDCOM export
-  (which is data portability, not a physical keepsake) — this is a natural
-  monetizable feature (e.g., pay-to-print, or a premium PDF template tier).
+  or PDF; a natural monetizable feature distinct from GEDCOM export.
 
 ---
 
-## Suggested Build Order (this session)
+## Suggested Next Build Priorities
 
-1. Wire Phase 2 stubs into the live globe/dashboard (low risk, high visual payoff)
-2. Build Phase 3 reconnection engine end-to-end (API routes, job, Match schema, frontend card) — highest priority, core motto
-3. Build Phase 4 GEDCOM export + memorial wall routes
-4. Document Phase 5 additions in schema/architecture docs for future build sessions (code to follow in later commits given scope size)
+1. **Notifications system** — highest priority; the Phase 3 loop is
+   functionally complete but silently useless without a way to alert users
+   when a match is confirmed.
+2. **matchQueue.js refactor** — extract shared scan logic so the nightly job
+   actually works, not just logs a loop.
+3. **Photo upload** — blocks a genuinely complete profile/memorial experience.
+4. **GEDCOM import UI** — completes the Phase 4 data-portability story
+   (export already works; import doesn't yet).
