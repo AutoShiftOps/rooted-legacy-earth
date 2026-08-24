@@ -3,10 +3,13 @@ import Globe from "react-globe.gl";
 import { useFlyToChoreography } from "../hooks/useFlyToChoreography.js";
 
 /**
- * CinematicGlobe v3 — fixes blurry zoom (high-res textures + explicit pixel
- * ratio + antialias) and makes pins self-explanatory (persistent labels +
- * richer tooltips), on top of the v2 fly-to choreography and remembrance
- * glow ring for deceased pins.
+ * CinematicGlobe v3.1 — textures are now bundled locally under
+ * public/textures/ instead of fetched from unpkg.com at runtime. This
+ * removes the external network dependency and guarantees the globe looks
+ * correct on first paint regardless of the user's connection to a third
+ * party CDN. Place these three files in rooted/frontend/public/textures/:
+ *   earth-night.jpg, earth-topology.png, night-sky.png
+ * (sourced from three-globe's example/img directory).
  */
 export default function CinematicGlobe({
   pins = [],
@@ -37,10 +40,6 @@ export default function CinematicGlobe({
     }
   }, [autoRotate]);
 
-  // High-DPI renderer setup — this is what fixes the "blurry on zoom" issue.
-  // three-globe has no automatic mip/LOD swap; without this the canvas
-  // renders at a fixed internal resolution regardless of zoom level or
-  // screen density, so zooming just magnifies the same soft pixels.
   useEffect(() => {
     if (!globeRef.current) return;
     const renderer = globeRef.current.renderer();
@@ -66,8 +65,6 @@ export default function CinematicGlobe({
   const pointAltitude = (d) => (d.isLiving ? 0.01 : 0.015);
   const pointRadius = (d) => (d.isLiving ? 0.35 : 0.42);
 
-  // Rich HTML tooltip so a dot is never just an unlabeled dot. Shows name,
-  // life years (or "living"), and a hint to click for the full profile.
   const pointLabel = (d) => `
     <div style="
       background: rgba(10,14,26,0.92);
@@ -101,13 +98,9 @@ export default function CinematicGlobe({
       ref={globeRef}
       width={dimensions.width}
       height={dimensions.height}
-      // 8K night-lights texture — the default bundled texture in
-      // react-globe.gl/three-globe is comparatively low-res, which is why
-      // zooming in previously looked soft. This is the actual resolution
-      // fix, not just a renderer setting.
-      globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-      bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-      backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+      globeImageUrl="/textures/earth-night.jpg"
+      bumpImageUrl="/textures/earth-topology.png"
+      backgroundImageUrl="/textures/night-sky.png"
       atmosphereColor="#5aa9ff"
       atmosphereAltitude={0.18}
       rendererConfig={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
